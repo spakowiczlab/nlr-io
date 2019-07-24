@@ -8,21 +8,17 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-if (!require("install.load")) {
-  install.packages("install.load")
-  library(install.load)
-}
-
 # CRAN packages
-.list.of.packages <- c("magrittr", "dplyr", "survival", "survminer", "tableone",
-                      "FFTrees", "tidyr", "lmtest")
+library(magrittr)
+library(dplyr)
+library(survival)
+library(survminer)
 
-install.load::install_load(.list.of.packages)
 ```
 
 
 ```{r load data}
-load("nlr-survival-deident.RData")
+s1 <- readRDS("nlr-survival-deident.RDS")
 
 set.seed(12345)
 ```
@@ -62,7 +58,7 @@ p2c <- s1 %>%
        x = "Months to Last Follow-Up or Death")
 
 p2c +
-  ggsave("../figures/fig2c_change-in-nlr_vs_time_statsmooth.pdf", height = 4, width = 4)
+  ggsave("figures/fig2c_change-in-nlr_vs_time_statsmooth.pdf", height = 4, width = 4)
 ```
 
 ```{r fig 2c}
@@ -76,6 +72,6 @@ s3 <-
 cph.m3o3 <- coxph(Surv(months, vitalstatus) ~ `Baseline NLR` + `Change in NLR` + `Change in NLR^3`, data = s3)
 
 ggforest(cph.m3o3) +
-  ggsave("../figures/fig2d_coxph_cubic-change.pdf", height = 2, width = 8)
+  ggsave("figures/fig2d_coxph_cubic-change.pdf", height = 2, width = 8)
 ```
 
