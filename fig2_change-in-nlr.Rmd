@@ -1,0 +1,81 @@
+---
+title: "fig2_change-in-nlr"
+author: "Dan Spakowicz"
+date: "12/21/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if (!require("install.load")) {
+  install.packages("install.load")
+  library(install.load)
+}
+
+# CRAN packages
+.list.of.packages <- c("magrittr", "dplyr", "survival", "survminer", "tableone",
+                      "FFTrees", "tidyr", "lmtest")
+
+install.load::install_load(.list.of.packages)
+```
+
+
+```{r load data}
+load("nlr-survival-deident.RData")
+
+set.seed(12345)
+```
+
+## Figure 2
+
+```{r fig 2a}
+change.cut <- surv_cutpoint(s1, time = "months", 
+                            event = "vitalstatus", 
+                            variables = "nlr_change")$cutpoint$cutpoint
+
+s1.cat <- 
+  s1 %>%
+  mutate(nlr_change_cat = ifelse(nlr_ratio < change.cut, 0, 1))
+
+sfit.cat <-  survfit(Surv(months, vitalstatus) ~ factor(nlr_change_cat), data = s1.cat)
+
+p2a <- ggsurvplot(sfit.cat, conf.int = TRUE, pval = FALSE, ggtheme = theme_bw(), legend = "none")
+
+p2a + ggsave("figures/fig2a_surv_1strat.pdf", height = 4, width = 4)
+
+ggpar(p2a, font.main = c(10))
+```
+
+
+```{r fig 2b}
+p2c <- s1 %>%
+  ungroup() %>%
+  select(nlr_change, vitalstatus, months) %>%
+  mutate(alivedead = ifelse(vitalstatus == 1, "dead", "alive")) %>%
+  ggplot(aes(x = months, y = nlr_change)) +
+  stat_smooth() + 
+  # geom_point(alpha = 0.1) +
+  # ylim(-1, 1)
+  theme_bw() +
+  labs(y = "Change in NLR", 
+       x = "Months to Last Follow-Up or Death")
+
+p2c +
+  ggsave("../figures/fig2c_change-in-nlr_vs_time_statsmooth.pdf", height = 4, width = 4)
+```
+
+```{r fig 2c}
+s3 <- 
+  s1 %>%
+  select(months, vitalstatus, nlr_baseline, nlr_change) %>%
+  mutate("Change in NLR^3" = nlr_change^3) %>%
+  rename("Change in NLR" = "nlr_change") %>%
+  rename("Baseline NLR" = "nlr_baseline")
+
+cph.m3o3 <- coxph(Surv(months, vitalstatus) ~ `Baseline NLR` + `Change in NLR` + `Change in NLR^3`, data = s3)
+
+ggforest(cph.m3o3) +
+  ggsave("../figures/fig2d_coxph_cubic-change.pdf", height = 2, width = 8)
+```
+
