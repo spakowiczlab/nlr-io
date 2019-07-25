@@ -3,4 +3,4 @@ Data and scripts to support the publication "Change in neutrophil to lymphocyte 
 
 The full citation will be added soon. 
 
-The de-identified dataset `nlr-survival-deident.RDS` is currently only available upon request to academic researchers. Please send an email using your institutional email address to daniel.spakowicz@osumc.edu.
+The de-identified dataset `nlr-survival-deident.RDS` is currently only available upon request to academic researchers. Please direct email requests to daniel.spakowicz@osumc.edu using an institutional address.
